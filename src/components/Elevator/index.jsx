@@ -1,13 +1,16 @@
 import "./styles.css";
 
 const Elevator = (props) => {
-  const floor = 9 - props.liftPosn;
+  const { isOpen, liftPosn } = props;
+  const floor = 9 - liftPosn;
   const elevStyles = {
     top: `${floor * 100 + 220}px`
   };
 
+  console.log("is lift open =>", isOpen);
+  const compClass = `flexRow elev ${isOpen ? "open" : "close"}`;
   return (
-    <div style={elevStyles} className="flexRow elev close">
+    <div style={elevStyles} className={compClass}>
       <div className="gate left " />
       <div className="gate right " />
     </div>

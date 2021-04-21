@@ -6,7 +6,6 @@ const Dialer = (props) => {
   const getButtons = React.useCallback(() => {
     const buttons = [];
     for (let i = 9; i >= 0; i--) {
-      console.log("dial created");
       if (i !== 0) {
         buttons.push(<Dial {...props} key={i} value={i} />);
       } else {

@@ -2,7 +2,7 @@ import "./styles.css";
 
 const buttons = (props) => {
   const btnClick = () => {
-    console.log("clicked", props.label);
+    props.onFloorSelect(props.floor, props.label);
   };
 
   return (

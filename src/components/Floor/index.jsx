@@ -11,6 +11,7 @@ const Floor = (props) => {
             <FloorButton
               onFloorSelect={onFloorSelect}
               floor={floor}
+              key={floor}
               label={""}
             />
           ]
@@ -19,11 +20,13 @@ const Floor = (props) => {
               <FloorButton
                 onFloorSelect={onFloorSelect}
                 floor={floor}
-                label={"Up"}
+                key={`up${floor}`}
+                label={"up"}
               />
               <FloorButton
                 onFloorSelect={onFloorSelect}
                 floor={floor}
+                key={`down${floor}`}
                 label={"down"}
               />
             </>

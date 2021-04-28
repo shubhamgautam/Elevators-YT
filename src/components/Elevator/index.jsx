@@ -6,8 +6,6 @@ const Elevator = (props) => {
   const elevStyles = {
     top: `${floor * 100 + 220}px`
   };
-
-  console.log("is lift open =>", isOpen);
   const compClass = `flexRow elev ${isOpen ? "open" : "close"}`;
   return (
     <div style={elevStyles} className={compClass}>

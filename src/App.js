@@ -6,57 +6,105 @@ import "./styles.css";
 
 const initState = {
   liftPosn: 0,
+  upFlrs: [],
+  downFlrs: [],
   selectedFloor: [],
   direction: null,
-  open: false
+  open: false,
+  move: false
 };
+
 export default function App() {
   const [appState, updateApp] = React.useState(initState);
 
-  const moveLift = () => {
+  const moveLift = (liftPosn) => {
+    console.log("appState", appState);
     if (!appState.liftPosn) {
-      if (appState.selectedFloor.length && appState.selectedFloor[0]) {
-        let liftDirection = "up";
-        let liftPosn = appState.selectedFloor[0];
-        const selectedFloor = appState.selectedFloor.slice(
-          1,
-          appState.selectedFloor.length
-        );
-        updateApp((prevState) => {
-          return {
-            ...prevState,
-            liftPosn,
-            direction: liftDirection,
-            selectedFloor
-          };
-        });
-      }
+      let liftDirection = "up";
+      let liftPosn = appState.upFlrs[0];
+      const selectedFloor = appState.upFlrs.slice(1, appState.upFlrs.length);
+      updateApp((prevState) => {
+        return {
+          ...prevState,
+          liftPosn,
+          direction: liftDirection,
+          upFlrs: selectedFloor
+        };
+      });
     } else {
-      if (appState.selectedFloor.length) {
-        let direction = null;
-        console.log("app state -> ", appState);
-
-        if (appState.liftPosn === 0) {
-          direction = "up";
-        } else if (appState.liftPosn === 9) {
-          direction = "down";
-        }
-        const isUp = direction === "up";
-        let liftPosn = isUp
-          ? appState.selectedFloor[0]
-          : appState.selectedFloor[appState.selectedFloor.length - 1];
-
-        const selectedFloor = isUp
-          ? appState.selectedFloor.splice(1, appState.selectedFloor.length)
-          : appState.selectedFloor.splice(0, appState.selectedFloor.length - 1);
+      let isUp = appState.direction === "up";
+      let direction = isUp ? "up" : "down";
+      if (!appState.upFlrs.length && !appState.downFlrs.length) {
         updateApp((prevState) => {
           return {
             ...prevState,
-            liftPosn,
-            direction: direction,
-            selectedFloor
+            direction: null,
+            move: false
           };
         });
+        return;
+      }
+
+      if (isUp) {
+        if (appState.upFlrs.length) {
+          const upFlrs = [...appState.upFlrs];
+          let liftPosn = upFlrs.shift();
+          direction =
+            !upFlrs.length && !appState.downFlrs.lenght ? null : direction;
+          updateApp((prevState) => {
+            return {
+              ...prevState,
+              liftPosn,
+              direction: direction,
+              upFLrs: upFlrs
+            };
+          });
+        } else if (appState.downFlrs.length) {
+          direction = "down";
+          isUp = false;
+          const downFloorArr = [...appState.downFlrs];
+          const liftPosn = downFloorArr.shift();
+          direction =
+            !downFloorArr.length && !appState.upFlrs.lenght ? null : direction;
+          updateApp((prevState) => {
+            return {
+              ...prevState,
+              liftPosn,
+              direction: direction,
+              downFlrs: downFloorArr
+            };
+          });
+        }
+      } else {
+        if (appState.downFlrs.length) {
+          const downFloorArr = [...appState.downFlrs];
+          const liftPosn = downFloorArr.shift();
+          direction =
+            !downFloorArr.length && !appState.upFlrs.lenght ? null : direction;
+
+          updateApp((prevState) => {
+            return {
+              ...prevState,
+              liftPosn,
+              downFlrs: downFloorArr
+            };
+          });
+        } else if (appState.upFlrs.length) {
+          direction = "up";
+          isUp = true;
+          const upFlrArr = [...appState.upFlrs];
+          const liftPosn = upFlrArr.shift();
+          direction =
+            !upFlrArr.length && !appState.downFlrs.lenght ? null : direction;
+          updateApp((prevState) => {
+            return {
+              ...prevState,
+              liftPosn,
+              direction: direction,
+              upFlrs: upFlrArr
+            };
+          });
+        }
       }
     }
   };
@@ -66,10 +114,27 @@ export default function App() {
    * @return void
    *  */
   const onFloorSelect = (floor, direction = null) => {
+    if (floor === appState.liftPosn) {
+      return;
+    }
+    let isUp = false;
+    if (direction) {
+      isUp = direction === "up";
+    } else {
+      const currPosition = appState.liftPosn || 0;
+      isUp = floor > currPosition;
+    }
+
     updateApp((prevState) => {
       return {
         ...prevState,
-        selectedFloor: [...prevState.selectedFloor, floor].sort((a, b) => a - b)
+        upFlrs: isUp
+          ? [...prevState.upFlrs, floor].sort((a, b) => a - b)
+          : prevState.upFlrs,
+        move: true,
+        downFlrs: !isUp
+          ? [...prevState.downFlrs, floor].sort((a, b) => b - a)
+          : prevState.downFlrs
       };
     });
   };
@@ -103,8 +168,8 @@ export default function App() {
   };
 
   React.useEffect(() => {
-    if (!appState.direction) moveLift();
-  }, [appState.selectedFloor]);
+    moveLift();
+  }, [appState.move]);
 
   React.useEffect(() => {
     if (!appState.open) {
@@ -134,7 +199,7 @@ export default function App() {
           selectedFloor={appState.selectedFloor}
         />
         <Dialer
-          selectedFloor={appState.selectedFloor}
+          selectedFloor={[...appState.upFlrs, ...appState.downFlrs]}
           onFloorSelect={onFloorSelect}
           openLift={openLift}
           closeLift={closeLift}
